@@ -1989,7 +1989,7 @@ library IterableMapping {
 }
 
 
-// Dependency file: contracts/baby/BabyTokenDividendTracker.sol
+// Dependency file: contracts/baby/KuberDeFiDividendTracker.sol
 
 // pragma solidity =0.8.4;
 
@@ -2269,7 +2269,7 @@ contract DividendPayingToken is
     }
 }
 
-contract BABYTOKENDividendTracker is OwnableUpgradeable, DividendPayingToken {
+contract KuberDeFiDividendTracker is OwnableUpgradeable, DividendPayingToken {
     using SafeMath for uint256;
     using SafeMathInt for int256;
     using IterableMapping for IterableMapping.Map;
@@ -2317,7 +2317,7 @@ contract BABYTOKENDividendTracker is OwnableUpgradeable, DividendPayingToken {
     function withdrawDividend() public pure override {
         require(
             false,
-            "Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main BABYTOKEN contract."
+            "Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main KuberDeFi contract."
         );
     }
 
@@ -2561,7 +2561,7 @@ abstract contract BaseToken {
 }
 
 
-// Root file: contracts/baby/BabyToken.sol
+// Root file: contracts/baby/KuberDeFi.sol
 
 pragma solidity =0.8.4;
 
@@ -2572,10 +2572,10 @@ pragma solidity =0.8.4;
 // import "@openzeppelin/contracts/proxy/Clones.sol";
 // import "contracts/interfaces/IUniswapV2Factory.sol";
 // import "contracts/interfaces/IUniswapV2Router02.sol";
-// import "contracts/baby/BabyTokenDividendTracker.sol";
+// import "contracts/baby/KuberDeFiDividendTracker.sol";
 // import "contracts/BaseToken.sol";
 
-contract BABYTOKEN is ERC20, Ownable, BaseToken {
+contract KuberDeFi is ERC20, Ownable, BaseToken {
     using SafeMath for uint256;
 
     uint256 public constant VERSION = 1;
@@ -2585,7 +2585,7 @@ contract BABYTOKEN is ERC20, Ownable, BaseToken {
 
     bool private swapping;
 
-    BABYTOKENDividendTracker public dividendTracker;
+    KuberDeFiDividendTracker public dividendTracker;
 
     address public rewardToken;
 
@@ -2676,7 +2676,7 @@ contract BABYTOKEN is ERC20, Ownable, BaseToken {
         // use by default 300,000 gas to process auto-claiming dividends
         gasForProcessing = 300000;
 
-        dividendTracker = BABYTOKENDividendTracker(
+        dividendTracker = KuberDeFiDividendTracker(
             payable(Clones.clone(addrs[3]))
         );
         dividendTracker.initialize(
@@ -2722,16 +2722,16 @@ contract BABYTOKEN is ERC20, Ownable, BaseToken {
     function updateDividendTracker(address newAddress) public onlyOwner {
         require(
             newAddress != address(dividendTracker),
-            "BABYTOKEN: The dividend tracker already has that address"
+            "KuberDeFi: The dividend tracker already has that address"
         );
 
-        BABYTOKENDividendTracker newDividendTracker = BABYTOKENDividendTracker(
+        KuberDeFiDividendTracker newDividendTracker = KuberDeFiDividendTracker(
             payable(newAddress)
         );
 
         require(
             newDividendTracker.owner() == address(this),
-            "BABYTOKEN: The new dividend tracker must be owned by the BABYTOKEN token contract"
+            "KuberDeFi: The new dividend tracker must be owned by the KuberDeFi token contract"
         );
 
         newDividendTracker.excludeFromDividends(address(newDividendTracker));
@@ -2747,7 +2747,7 @@ contract BABYTOKEN is ERC20, Ownable, BaseToken {
     function updateUniswapV2Router(address newAddress) public onlyOwner {
         require(
             newAddress != address(uniswapV2Router),
-            "BABYTOKEN: The router already has that address"
+            "KuberDeFi: The router already has that address"
         );
         emit UpdateUniswapV2Router(newAddress, address(uniswapV2Router));
         uniswapV2Router = IUniswapV2Router02(newAddress);
@@ -2759,7 +2759,7 @@ contract BABYTOKEN is ERC20, Ownable, BaseToken {
     function excludeFromFees(address account, bool excluded) public onlyOwner {
         require(
             _isExcludedFromFees[account] != excluded,
-            "BABYTOKEN: Account is already the value of 'excluded'"
+            "KuberDeFi: Account is already the value of 'excluded'"
         );
         _isExcludedFromFees[account] = excluded;
 
@@ -2805,7 +2805,7 @@ contract BABYTOKEN is ERC20, Ownable, BaseToken {
     {
         require(
             pair != uniswapV2Pair,
-            "BABYTOKEN: The PancakeSwap pair cannot be removed from automatedMarketMakerPairs"
+            "KuberDeFi: The PancakeSwap pair cannot be removed from automatedMarketMakerPairs"
         );
 
         _setAutomatedMarketMakerPair(pair, value);
@@ -2814,7 +2814,7 @@ contract BABYTOKEN is ERC20, Ownable, BaseToken {
     function _setAutomatedMarketMakerPair(address pair, bool value) private {
         require(
             automatedMarketMakerPairs[pair] != value,
-            "BABYTOKEN: Automated market maker pair is already set to that value"
+            "KuberDeFi: Automated market maker pair is already set to that value"
         );
         automatedMarketMakerPairs[pair] = value;
 
@@ -2828,11 +2828,11 @@ contract BABYTOKEN is ERC20, Ownable, BaseToken {
     function updateGasForProcessing(uint256 newValue) public onlyOwner {
         require(
             newValue >= 200000 && newValue <= 500000,
-            "BABYTOKEN: gasForProcessing must be between 200,000 and 500,000"
+            "KuberDeFi: gasForProcessing must be between 200,000 and 500,000"
         );
         require(
             newValue != gasForProcessing,
-            "BABYTOKEN: Cannot update gasForProcessing to same value"
+            "KuberDeFi: Cannot update gasForProcessing to same value"
         );
         emit GasForProcessingUpdated(newValue, gasForProcessing);
         gasForProcessing = newValue;
